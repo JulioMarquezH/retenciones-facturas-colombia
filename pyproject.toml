@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cifrato-retenciones"
+version = "0.1.0"
+description = "Calcula retenciones aplicables a facturas electronicas DIAN UBL."
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+cifrato-retenciones = "cifrato_retenciones.cli:main"
+cifrato-retenciones-web = "cifrato_retenciones.web:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]

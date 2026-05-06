@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cifrato Retenciones</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="workspace">
+        <header class="topbar compact">
+          <div>
+            <p class="eyebrow">Cifrato</p>
+            <h1>Retenciones de facturas</h1>
+          </div>
+        </header>
+
+        <section class="upload-panel">
+          <div class="dropzone-grid">
+            <div class="dropzone" id="fileDropzone" role="button" tabindex="0">
+              <i data-lucide="file-code-2"></i>
+              <span>XMLs</span>
+              <small>Selecciona o arrastra archivos XML/PDF</small>
+            </div>
+            <div class="dropzone" id="folderDropzone" role="button" tabindex="0">
+              <i data-lucide="folder-open"></i>
+              <span>Carpeta</span>
+              <small>Selecciona o arrastra una carpeta</small>
+            </div>
+          </div>
+          <input class="visually-hidden" id="fileInput" type="file" accept=".xml,.pdf,text/xml,application/xml,application/pdf" multiple>
+          <input class="visually-hidden" id="folderInput" type="file" multiple webkitdirectory directory>
+
+          <div class="settings" hidden>
+            <input id="uvtInput" type="hidden" value="52374">
+            <select id="agentSelect">
+              <option value="auto" selected>Inferir</option>
+            </select>
+            <input id="reteivaInput" type="checkbox" checked>
+            <input id="reteicaInput" type="checkbox" checked>
+          </div>
+
+          <div class="actions">
+            <div class="file-list" id="fileList">No hay archivos seleccionados</div>
+            <button class="primary-button" id="analyzeButton" type="button">
+              <i data-lucide="calculator"></i>
+              Analizar
+            </button>
+          </div>
+        </section>
+
+        <section class="status" id="status" hidden></section>
+        <section class="summary-grid" id="summary" hidden></section>
+        <section class="results" id="results"></section>
+      </section>
+    </main>
+    <div class="pdf-modal" id="pdfModal" hidden>
+      <div class="pdf-modal-backdrop" data-close-pdf></div>
+      <section class="pdf-modal-panel" role="dialog" aria-modal="true" aria-labelledby="pdfModalTitle">
+        <header class="pdf-modal-head">
+          <h2 id="pdfModalTitle">Factura PDF</h2>
+          <button class="icon-button" type="button" data-close-pdf title="Cerrar">
+            <i data-lucide="x"></i>
+          </button>
+        </header>
+        <iframe id="pdfFrame" title="Vista previa PDF"></iframe>
+      </section>
+    </div>
+  </body>
+</html>
