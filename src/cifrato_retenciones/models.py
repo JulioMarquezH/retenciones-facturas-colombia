@@ -28,6 +28,8 @@ class InvoiceLine:
     description: str
     quantity: Decimal
     line_extension_amount: Decimal
+    standard_item_id: str | None = None
+    standard_item_scheme: str | None = None
     taxes: list[Tax] = field(default_factory=list)
 
 

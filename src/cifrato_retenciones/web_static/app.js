@@ -237,7 +237,7 @@ function renderInvoice(report) {
   const partyRows = [
     ["Proveedor", `${invoice.supplier.name} (${invoice.supplier.document_id})`],
     ["Comprador", `${invoice.customer.name} (${invoice.customer.document_id})`],
-    ["Base antes de impuestos", money(totals.tax_exclusive_amount || totals.line_extension_amount)],
+    ["Base antes de impuestos", money(totals.retention_base || totals.tax_exclusive_amount || totals.line_extension_amount)],
     ["Total factura", money(totals.payable_amount)],
   ];
 

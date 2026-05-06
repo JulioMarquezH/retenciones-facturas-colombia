@@ -123,6 +123,36 @@ class ParserAndRulesTest(unittest.TestCase):
         self.assertFalse(reteica.suggested)
         self.assertEqual(reteica.amount, Decimal("0"))
 
+    def test_detects_fuel_unspsc_and_keeps_reteica_pending(self) -> None:
+        xml = INVOICE_XML.replace("MOUSE INALAMBRICO", "CORRIENTE").replace(
+            "<cac:PartyTaxScheme>",
+            """<cac:PhysicalLocation>
+          <cac:Address>
+            <cbc:CityName>MEDELLIN</cbc:CityName>
+          </cac:Address>
+        </cac:PhysicalLocation>
+        <cac:PartyTaxScheme>""",
+            2,
+        ).replace(
+            "</cac:Item>",
+            """
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeName="UNSPSC">15101506</cbc:ID>
+      </cac:StandardItemIdentification>
+    </cac:Item>""",
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "fuel.xml"
+            path.write_text(xml, encoding="utf-8")
+            invoice = parse_invoice_file(path)
+
+        self.assertEqual(classify_invoice(invoice).concept, "combustible")
+        results = calculate_retentions(invoice)
+        reteica = next(result for result in results if result.code == "reteica")
+
+        self.assertFalse(reteica.applies)
+        self.assertTrue(reteica.suggested)
+
 
 if __name__ == "__main__":
     unittest.main()

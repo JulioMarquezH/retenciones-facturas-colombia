@@ -46,6 +46,19 @@ def calculate_retentions(invoice: Invoice, context: RuleContext | None = None) -
 
 def classify_invoice(invoice: Invoice) -> Classification:
     text = " ".join(line.description for line in invoice.lines).lower()
+    item_codes = {line.standard_item_id for line in invoice.lines if line.standard_item_id}
+
+    fuel_codes = {"15101506"}
+    if item_codes & fuel_codes:
+        return Classification(
+            concept="combustible",
+            confidence=Decimal("0.90"),
+            evidence=[
+                f"Linea {line.id}: UNSPSC {line.standard_item_id} - {line.description}"
+                for line in invoice.lines
+                if line.standard_item_id in fuel_codes
+            ],
+        )
 
     service_patterns = {
         "honorarios": [r"\bhonorario\b", r"\bhonorarios\b", r"\bcomision\b", r"\bcomisión\b", r"\bcomisiones\b"],
@@ -122,6 +135,10 @@ def _income_tax_result(
         min_base = ctx.uvt * Decimal("27")
         rate = Decimal("0.025") if ctx.supplier_is_income_tax_filer else Decimal("0.035")
         label = "compras generales"
+    elif classification.concept == "combustible":
+        min_base = ctx.uvt * Decimal("27")
+        rate = Decimal("0.025") if ctx.supplier_is_income_tax_filer else Decimal("0.035")
+        label = "compra de combustible"
     else:
         return RetentionResult(
             code="retefuente",
@@ -230,6 +247,9 @@ def _local_tax_result(invoice: Invoice, classification: Classification, ctx: Rul
     withholding_agent = _is_withholding_agent(invoice, ctx)
 
     if classification.concept == "indeterminado":
+        missing = ["concepto tributario o actividad economica"]
+        if not municipality:
+            missing.insert(0, "municipio de retencion")
         return RetentionResult(
             code="reteica",
             name="ReteICA",
@@ -237,9 +257,10 @@ def _local_tax_result(invoice: Invoice, classification: Classification, ctx: Rul
             base=base,
             rate=Decimal("0"),
             amount=Decimal("0"),
-            reason="No se sugiere ReteICA porque no fue posible clasificar el concepto de la factura.",
+            reason=f"ReteICA queda pendiente porque no fue posible clasificar el concepto de la factura con suficiente confianza. Falta: {_human_join(missing)}.",
             evidence=[f"Ciudad proveedor: {invoice.supplier.city or 'no disponible'}", f"Ciudad comprador: {invoice.customer.city or 'no disponible'}"],
-            missing_data=["concepto tributario o actividad economica"],
+            missing_data=missing,
+            suggested=True,
         )
 
     if not withholding_agent:

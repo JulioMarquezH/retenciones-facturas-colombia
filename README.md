@@ -6,7 +6,7 @@ Solucion tecnica para recibir una o varias facturas electronicas DIAN UBL 2.1, e
 
 - Lee XML DIAN, incluyendo archivos `AttachedDocument` que traen la factura real dentro de un `CDATA`.
 - Extrae proveedor, comprador, NIT, fecha, lineas, impuestos, bases y totales.
-- Clasifica el concepto principal de la factura con reglas simples sobre las descripciones de las lineas.
+- Clasifica el concepto principal de la factura con reglas simples sobre las descripciones de las lineas y, cuando existe, el codigo UNSPSC del item.
 - Calcula retenciones nacionales iniciales:
   - Retencion en la fuente.
   - ReteIVA.

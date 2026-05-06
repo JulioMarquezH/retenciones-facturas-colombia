@@ -31,6 +31,7 @@ def invoice_report(invoice: Invoice, retentions: list[RetentionResult]) -> dict[
                 "tax_exclusive_amount": invoice.tax_exclusive_amount,
                 "tax_inclusive_amount": invoice.tax_inclusive_amount,
                 "payable_amount": invoice.payable_amount,
+                "retention_base": _retention_base(invoice),
             },
             "taxes": [asdict(tax) for tax in invoice.taxes],
             "lines": [asdict(line) for line in invoice.lines],
@@ -48,6 +49,14 @@ def json_default(value: Any) -> str:
     if isinstance(value, Decimal):
         return str(value)
     raise TypeError(f"Object of type {type(value).__name__} is not JSON serializable")
+
+
+def _retention_base(invoice: Invoice) -> Decimal:
+    if invoice.tax_exclusive_amount > 0:
+        return invoice.tax_exclusive_amount
+    if invoice.line_extension_amount > 0:
+        return invoice.line_extension_amount
+    return invoice.payable_amount
 
 
 def _unique(values: list[str | None]) -> list[str]:

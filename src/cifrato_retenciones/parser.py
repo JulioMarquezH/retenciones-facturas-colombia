@@ -110,11 +110,14 @@ def _parse_party(root: ET.Element, path: str) -> Party:
 
 
 def _parse_line(line: ET.Element) -> InvoiceLine:
+    standard_item = line.find("./cac:Item/cac:StandardItemIdentification/cbc:ID", NS)
     return InvoiceLine(
         id=_text(line, "./cbc:ID"),
         description=_text(line, "./cac:Item/cbc:Description"),
         quantity=_decimal(_text(line, "./cbc:InvoicedQuantity", default="0")),
         line_extension_amount=_decimal(_text(line, "./cbc:LineExtensionAmount", default="0")),
+        standard_item_id=(standard_item.text or "").strip() if standard_item is not None and standard_item.text else None,
+        standard_item_scheme=standard_item.attrib.get("schemeName") if standard_item is not None else None,
         taxes=[_parse_tax_total(tax_total) for tax_total in line.findall("./cac:TaxTotal", NS)],
     )
 
