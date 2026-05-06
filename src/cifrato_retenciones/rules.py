@@ -227,6 +227,7 @@ def _vat_withholding_result(
 def _local_tax_result(invoice: Invoice, classification: Classification, ctx: RuleContext) -> RetentionResult:
     base = _retention_base(invoice)
     municipality = _municipality(invoice)
+    withholding_agent = _is_withholding_agent(invoice, ctx)
 
     if classification.concept == "indeterminado":
         return RetentionResult(
@@ -239,6 +240,21 @@ def _local_tax_result(invoice: Invoice, classification: Classification, ctx: Rul
             reason="No se sugiere ReteICA porque no fue posible clasificar el concepto de la factura.",
             evidence=[f"Ciudad proveedor: {invoice.supplier.city or 'no disponible'}", f"Ciudad comprador: {invoice.customer.city or 'no disponible'}"],
             missing_data=["concepto tributario o actividad economica"],
+        )
+
+    if not withholding_agent:
+        return RetentionResult(
+            code="reteica",
+            name="ReteICA",
+            applies=False,
+            base=base,
+            rate=Decimal("0"),
+            amount=Decimal("0"),
+            reason="No aplica ReteICA porque el comprador no parece ser agente retenedor en esta factura.",
+            evidence=[
+                f"Comprador: {invoice.customer.name} ({invoice.customer.document_id})",
+                f"Concepto clasificado: {classification.concept}",
+            ],
         )
 
     if not municipality:

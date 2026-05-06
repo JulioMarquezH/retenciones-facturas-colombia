@@ -45,6 +45,8 @@ ReteICA depende del municipio, actividad economica/CIIU, tarifa oficial local y 
 
 Si esos datos no estan cargados, la salida puede marcar ReteICA como `suggested: true`, conserva `missing_data` y no suma ningun valor al total retenido.
 
+Si el comprador es consumidor final o usa un documento generico, ReteICA se marca como no aplicable porque no se trata como agente retenedor.
+
 El catalogo interno vive en:
 
 ```text

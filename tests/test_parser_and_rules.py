@@ -61,6 +61,8 @@ INVOICE_XML = """<?xml version="1.0" encoding="utf-8"?>
 </Invoice>
 """
 
+CONSUMER_FINAL_XML = INVOICE_XML.replace("CLIENTE SAS", "CONSUMIDOR FINAL GENERICO").replace("900333444", "222222222222")
+
 
 class ParserAndRulesTest(unittest.TestCase):
     def test_parses_invoice_and_calculates_retentions(self) -> None:
@@ -107,6 +109,19 @@ class ParserAndRulesTest(unittest.TestCase):
         self.assertTrue(retefuente.applies)
         self.assertEqual(retefuente.rate, Decimal("0.035"))
         self.assertEqual(retefuente.amount, Decimal("70000"))
+
+    def test_reteica_does_not_suggest_for_consumer_final(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "consumer.xml"
+            path.write_text(CONSUMER_FINAL_XML, encoding="utf-8")
+            invoice = parse_invoice_file(path)
+
+        results = calculate_retentions(invoice)
+        reteica = next(result for result in results if result.code == "reteica")
+
+        self.assertFalse(reteica.applies)
+        self.assertFalse(reteica.suggested)
+        self.assertEqual(reteica.amount, Decimal("0"))
 
 
 if __name__ == "__main__":
